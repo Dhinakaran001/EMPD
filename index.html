@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>empd</title>
+        <link rel="stylesheet" href="assets/css/emp.css">
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td>
+                    <form onsubmit="onFormSubmit()">
+                        <div>
+                            <label>Full Name</label>
+                            <input type="text" name="fullName" id="fullName" onkeyup="userName()">
+                            <p id="userStatus"></p>
+                        </div>
+                        <div>
+                            <label>Email</label>
+                            <input type="email" name="email" id="email" onkeyup="userEmail()">
+                            <p id="emailStatus"></p>
+                        </div>
+                        <div>
+                            <label>Mobile Number</label>
+                            <input type="number" name="number" id="number" onkeyup="userNumber()">
+                            <p id="numberStatus"></p>
+                        </div>
+                        <div>
+                            <label>Salary</label>
+                            <input type="number" name="salary" id="salary" onkeyup="userSalary()">
+                            <p id="salaryStatus"></p>
+                        </div>
+                        <div  class="form-action-buttons">
+                            <input type="submit" value="Submit">
+                        </div>
+                    </form>
+                </td>
+                <td>
+                    <table class="list" id="employeeList">
+                        <thead>
+                            <tr>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Mobile Number</th>
+                                <th>Salary</th>
+                                <th>Option</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </table>
+
+        <script>
+            var selectedRow = null
+
+            function onFormSubmit() {
+                event.preventDefault();
+                
+                
+                
+                if(validate()) {
+                    var formData = readFormData();
+                    if (selectedRow == null){
+                        insertNewRecord(formData);
+                        document.getElementById('userStatus').innerText = '';
+                        document.getElementById('emailStatus').innerText = '';
+                        document.getElementById('numberStatus').innerText = '';
+                        document.getElementById('salaryStatus').innerText = '';
+                        saveData();
+                    }
+                    else{
+                        updateRecord(formData);
+                    }
+                    resetForm();
+                    }else{
+                        alert("Somthing wrong");
+                    }
+            }
+
+            function saveData(){
+                let fullName = document.getElementById("fullName").value;
+                let email = document.getElementById("email").value;
+                let number = document.getElementById("number").value;
+                let salary = document.getElementById("salary").value;
+
+                localStorage.setItem("FullName : ",fullName)
+                localStorage.setItem("Email : ",email)
+                localStorage.setItem("MobileNumber : ",number)
+                localStorage.setItem("Salary : ",salary)
+            }
+
+            function readFormData() {
+                var formData = {};
+                formData["fullName"] = document.getElementById("fullName").value;
+                formData["email"] = document.getElementById("email").value;
+                formData["number"] = document.getElementById("number").value;
+                formData["salary"] = document.getElementById("salary").value;
+
+                return formData;
+            }
+
+            function insertNewRecord(data) {
+                var table = document.getElementById("employeeList").getElementsByTagName('tbody')[0];
+                var newRow = table.insertRow(table.length);
+                cell1 = newRow.insertCell(0);
+                cell1.innerHTML = data.fullName;
+                cell2 = newRow.insertCell(1);
+                cell2.innerHTML = data.email;
+                cell3 = newRow.insertCell(2);
+                cell3.innerHTML = data.number;
+                cell4 = newRow.insertCell(3);
+                cell4.innerHTML = data.salary;
+                cell5 = newRow.insertCell(4);
+                cell5.innerHTML = `<a id="edit" onClick="onEdit(this)">Edit</a>
+                                <a id="delete" onClick="onDelete(this)">Delete</a>`;
+            }
+
+            function resetForm() {
+                document.getElementById("fullName").value = "";
+                document.getElementById("email").value = "";
+                document.getElementById("number").value = "";
+                document.getElementById("salary").value = "";
+                selectedRow = null;
+            }
+
+            function onEdit(td) {
+                selectedRow = td.parentElement.parentElement;
+                document.getElementById("fullName").value = selectedRow.cells[0].innerHTML;
+                document.getElementById("email").value = selectedRow.cells[1].innerHTML;
+                document.getElementById("number").value = selectedRow.cells[2].innerHTML;
+                document.getElementById("salary").value = selectedRow.cells[3].innerHTML;
+            }
+            function updateRecord(formData) {
+                selectedRow.cells[0].innerHTML = formData.fullName;
+                selectedRow.cells[1].innerHTML = formData.email;
+                selectedRow.cells[2].innerHTML = formData.number;
+                selectedRow.cells[3].innerHTML = formData.salary;
+            }
+
+            function onDelete(td) {
+                if (confirm('Are you sure to delete this record ?')) {
+                    row = td.parentElement.parentElement;
+                    document.getElementById("employeeList").deleteRow(row.rowIndex);
+                    resetForm();
+                }
+            }
+            function userName(){
+                var fullName = document.getElementById('fullName').value;
+                var userStatus = document.getElementById('userStatus');
+
+                if(fullName === "") {
+                    userStatus.innerText = '* Please Enter Your Name';
+                    userStatus.style.color = "orangered";
+                    return false;
+                }else if(fullName.length <= 4) {
+                    userStatus.innerText = '* Username must be atleast 5 Characters';
+                    userStatus.style.color = "orangered";
+                    return false;
+                } else if(fullName.length > 4){
+                    userStatus.innerText = '* Valid Username';
+                    userStatus.style.color = "green";
+                    return true;
+                }
+            }
+            function userEmail(){
+                var email = document.getElementById("email").value;
+                var emailStatus = document.getElementById("emailStatus");
+                var regemail = /^\S+@+\S+\.\S+$/; 
+
+                if(email === ""){
+                    emailStatus.innerText = '* Please Enter Your Email-id';
+                    emailStatus.style.color = "orangered";
+                    return false
+                }else if(regemail.test(email) === false){
+                    emailStatus.innerText = '* Invalid Email-id';
+                    emailStatus.style.color = "orangered";
+                    return false;
+                }else if(regemail.test(email) === true){
+                    emailStatus.innerText = '* Valid Email-id';
+                    emailStatus.style.color = "green";
+                    return true;
+                }
+            }
+            function userNumber(){
+                var number = document.getElementById("number").value;
+                var numberStatus = document.getElementById("numberStatus");
+                var regnumber = /^[0-9]\d{9}$/;
+
+                if(number === ""){
+                    numberStatus.innerText = '* Please Enter Your Email-id';
+                    numberStatus.style.color = "orangered";
+                    return false;
+                }else if(regnumber.test(number) === false){
+                    numberStatus.innerText = '* Invalid Mobile number';
+                    numberStatus.style.color = "orangered";
+                    return false;
+                }else if(regnumber.test(number) === true){
+                    numberStatus.innerText = '* Valid Mobile number';
+                    numberStatus.style.color = "green";
+                    return true;
+                }
+            }
+            function userSalary(){
+                var salary = document.getElementById("salary").value;
+                var salaryStatus =document.getElementById("salaryStatus");
+
+                if (salary === ""){
+                    salaryStatus.innerText = "* Please Enter Your Salary";
+                    salaryStatus.style.color = "orangered";
+                    return false;
+                }else if(salary.length > 1){
+                    salaryStatus.innerText = '* Valid Salary number';
+                    salaryStatus.style.color = "green";
+                    return true;
+                }
+            }
+            function validate(){
+                if(userName() , userEmail() , userNumber() , userSalary()) {
+                    return true
+                } else {
+                    return false;
+                }
+            }
+        </script>
+        <!-- importent -->
+        <!-- select country street using js -->
+        <!-- js masking -->
+        <!-- CRP -->
+        <!-- W3C -->
+        <!-- how to generate pdf using js(jdpdf) -->
+        <!-- data security -->
+    </body>
+</html>
